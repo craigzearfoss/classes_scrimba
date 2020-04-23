@@ -633,3 +633,442 @@ return (
     <h2>You have {this.state.unreadMessages.length} unread messages!</h2>
 }
 ```
+
+### fetch
+
+- A promise-based way to perform http requests.
+- [https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch)
+- We'll use the Star Wars API (SWAPI) for data. ([https://swapi.dev/](https://swapi.dev/))
+- Example:
+
+```
+import React, {Component} from "react"
+
+class App extends Component {
+    constructor() {
+        super()
+        this.state = {
+            loading: false,
+            character: {}
+        }
+    }
+
+    componentDidMount() {
+        this.setState({loading: true})
+        fetch("https://swapi.co/api/people/1")
+            .then(response => response.json())
+            .then(data => {
+                this.setState({
+                    loading: false,
+                    character: data
+                })
+            })
+    }
+
+    render() {
+        const text = this.state.loading ? "loading..." : this.state.character.name
+        return (
+            <div>
+                <p>{text}</p>
+            </div>
+        )
+    }
+}
+
+export default App
+```
+
+# Forms in React
+
+- **Formik** is a library that takes the pain out of writing React forms.
+- With React we don't wait until the form is submitted to validate it. We keep the form in state.
+  - On every keystroke we update the form state.
+- [https://reactjs.org/docs/forms.html](https://reactjs.org/docs/forms.html)
+- Make sure you got the input fields a "name" property and they exactly match the properties in state.
+- Example for **input text**:
+
+```
+import React, {Component} from "react"
+
+class App extends Component {
+    constructor() {
+        super()
+        this.state = {
+            firstName: "",
+            lastName: ""
+        }
+        this.handleChange = this.handleChange.bind(this)
+    }
+
+    handleChange(event) {
+        this.setState({
+            [event.target.name]: event.target.value
+        })
+    }
+
+    render() {
+        return (
+            <form>
+                <input type="text" name="firstName" placeholder="First Name" onChange={this.handleChange} />
+                <br />
+                <input type="text" name="lastName" placeholder="Last Name" onChange={this.handleChange} />
+                <h1>{this.state.firstName} {this.state.lastName}</h1>
+            </form>
+        )
+    }
+}
+
+export default App
+```
+
+## Control form
+
+- We want what is in our forms to perfectly match our state. In other words, we want the state to be our single source of truth.
+- In the example above the state is "reactive".
+- To do this at the state variable in the form input's value property.
+- Example for **input text**:
+
+```
+import React, {Component} from "react"
+
+class App extends Component {
+    constructor() {
+        super()
+        this.state = {
+            firstName: "",
+            lastName: ""
+        }
+        this.handleChange = this.handleChange.bind(this)
+    }
+
+    handleChange(event) {
+        const {name, value} = event.target
+        this.setState({
+            [name]: value
+        })
+    }
+
+    render() {
+        return (
+            <form>
+                <input
+                    type="text"
+                    value={this.state.firstName}
+                    name="firstName"
+                    placeholder="First Name"
+                    onChange={this.handleChange}
+                />
+                <br />
+                <input
+                    type="text"
+                    value={this.state.lastName}
+                    name="lastName"
+                    placeholder="Last Name"
+                    onChange={this.handleChange}
+                />
+                <h1>{this.state.firstName} {this.state.lastName}</h1>
+            </form>
+        )
+    }
+}
+
+export default App
+```
+
+- **TIP**: You can save yourself potential problems by pulling the name and value from the event before the set state method like shown above.
+  - If you're interested in why this is important you can look up React's synthetic event.
+
+### **textarea** element
+
+- React makes it self-closing element like an \<input> element.
+  - So you can use the **value** property just like an \<input type="text"> element.
+
+```
+<textarea
+  value={"Some default value}"
+  onChange={this.handleChange}
+/>
+```
+
+### **checkbox** element
+
+- Note you need to add an **onChange** handler or the checkbox won't know what to do when it's clicked.
+- In the **handleChange** method we need to check if the element being changed is a checkbox.
+
+```
+handleChange(event) {
+  const {name, value, type, checked} = event.target
+  type === "checkbox" ? this.setState({ [name]: checked }) : this.setState({ [name]: value })
+}
+...
+      <label>
+        <input
+          type="checkbox"
+          name="isFriendly"
+          checked={this.handleChange}
+        /> Is friendly?
+      </label>
+```
+
+### **radio** element
+
+```
+<label>
+  <input
+    type="radio"
+    name="gender"
+    value="male"
+    checked={this.state.gender === "male"}
+    onChange={this.handleChange}
+  /> Male
+</label>
+
+<label>
+  <input
+    type="radio"
+    name="gender"
+    value="female"
+    checked={this.state.gender === "female"}
+    onChange={this.handleChange}
+  /> Female
+</label>
+```
+
+### **select** element
+
+```
+<select
+  value={this.state.favColor}
+  onChange={this.handleChange}
+  name="favColor"
+>
+  <option value="blue">Blue</option>
+  <option value="green">Green</option>
+  <option value="red">Red</option>
+  <option value="orange">Orange</option>
+  <option value="yellow">Yellow</option>
+</select>
+```
+
+### Note that we can use one **handleChange** method for all elements.
+
+- It is only two lines.
+- All elements are handled the same except for checkboxes.
+
+```
+handleChange(event) {
+  const {name, value, type, checked} = event.target
+  type === "checkbox" ? this.setState({ [name]: checked }) : this.setState({ [name]: value })
+}
+```
+
+### Submitting a form
+
+- Note that in HTML5 buttons inside of forms act like \<input type="submit" /> elements when they are clicked and will submit the form.
+- You can add an **onClick** method on the button, or an **onSubmit** method on the form like below.
+
+```
+<form onSubmit={this.handleSubmit}>
+```
+
+### React Form Practice
+
+```
+import React, {Component} from "react"
+
+class App extends Component {
+    constructor() {
+        super()
+        this.state = {
+            firstName: "",
+            lastName: "",
+            age: "",
+            gender: "",
+            destination: "",
+            isVegan: false,
+            isKosher: false,
+            isLactoseFree: false
+        }
+        this.handleChange = this.handleChange.bind(this)
+    }
+
+    handleChange(event) {
+        const {name, value, type, checked} = event.target
+        type === "checkbox" ?
+            this.setState({
+                [name]: checked
+            })
+        :
+        this.setState({
+            [name]: value
+        })
+    }
+
+    render() {
+        return (
+            <main>
+                <form>
+                    <input
+                        name="firstName"
+                        value={this.state.firstName}
+                        onChange={this.handleChange}
+                        placeholder="First Name"
+                    />
+                    <br />
+
+                    <input
+                        name="lastName"
+                        value={this.state.lastName}
+                        onChange={this.handleChange}
+                        placeholder="Last Name"
+                    />
+                    <br />
+
+                    <input
+                        name="age"
+                        value={this.state.age}
+                        onChange={this.handleChange}
+                        placeholder="Age"
+                    />
+                    <br />
+
+                    <label>
+                        <input
+                            type="radio"
+                            name="gender"
+                            value="male"
+                            checked={this.state.gender === "male"}
+                            onChange={this.handleChange}
+                        /> Male
+                    </label>
+
+                    <br />
+
+                    <label>
+                        <input
+                            type="radio"
+                            name="gender"
+                            value="female"
+                            checked={this.state.gender === "female"}
+                            onChange={this.handleChange}
+                        /> Female
+                    </label>
+
+                    <br />
+
+                    <select
+                        value={this.state.destination}
+                        name="destination"
+                        onChange={this.handleChange}
+                    >
+                        <option value="">-- Please Choose a destination --</option>
+                        <option value="germany">Germany</option>
+                        <option value="norway">Norway</option>
+                        <option value="north pole">North Pole</option>
+                        <option value="south pole">South Pole</option>
+                    </select>
+
+                    <br />
+
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="isVegan"
+                            onChange={this.handleChange}
+                            checked={this.state.isVegan}
+                        /> Vegan?
+                    </label>
+                    <br />
+
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="isKosher"
+                            onChange={this.handleChange}
+                            checked={this.state.isKosher}
+                        /> Kosher?
+                    </label>
+                    <br />
+
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="isLactoseFree"
+                            onChange={this.handleChange}
+                            checked={this.state.isLactoseFree}
+                        /> Lactose Free?
+                    </label>
+                    <br />
+
+                    <button>Submit</button>
+                </form>
+                <hr />
+                <h2>Entered information:</h2>
+                <p>Your name: {this.state.firstName} {this.state.lastName}</p>
+                <p>Your age: {this.state.age}</p>
+                <p>Your gender: {this.state.gender}</p>
+                <p>Your destination: {this.state.destination}</p>
+                <p>Your dietary restrictions:</p>
+
+                <p>Vegan: {this.state.isVegan ? "Yes" : "No"}</p>
+                <p>Kosher: {this.state.isKosher ? "Yes" : "No"}</p>
+                <p>Lactose Free: {this.state.isLactoseFree ? "Yes" : "No"}</p>
+
+            </main>
+        )
+    }
+}
+
+export default App
+```
+
+- Note that if we use the ES6 spread operator the dietary restrictions could be written as below:
+
+```
+handleChange(event) {
+    const {name, value, type, checked} = event.target
+    type === "checkbox" ?
+        this.setState(prevState => {
+            return {
+                dietaryRestrictions: {
+                    ...prevState.dietaryRestrictions,
+                    [name]: checked
+                }
+            }
+        })
+    :
+    this.setState({
+        [name]: value
+    })
+}
+...
+<label>
+  <input
+    type="checkbox"
+    name="isVegan"
+    onChange={this.handleChange}
+    checked={this.state.dietaryRestrictions.isVegan}
+  /> Vegan?
+</label>
+<br />
+
+<label>
+  <input
+    type="checkbox"
+    name="isKosher"
+    onChange={this.handleChange}
+    checked={this.state.dietaryRestrictions.isKosher}
+  /> Kosher?
+</label>
+<br />
+
+<label>
+  <input
+    type="checkbox"
+    name="isLactoseFree"
+    onChange={this.handleChange}
+    checked={this.state.dietaryRestrictions.isLactoseFree}
+  /> Lactose Free?
+</label>
+<br />
+```

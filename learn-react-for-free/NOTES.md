@@ -874,7 +874,7 @@ handleChange(event) {
 ### React Form Practice
 
 ```
-import React, {Component} from "react"
+import React, {Component} from "react";
 
 class App extends Component {
     constructor() {
@@ -1019,7 +1019,7 @@ class App extends Component {
     }
 }
 
-export default App
+export default App;
 ```
 
 - Note that if we use the ES6 spread operator the dietary restrictions could be written as below:
@@ -1072,3 +1072,95 @@ handleChange(event) {
 </label>
 <br />
 ```
+
+### To keep component from getting too big it is a good idea to separate it into presentational and smart components.
+- This is sometimes referred to **presentational** and **container** components, **smart** and **dumb** components, **containers** and **components**, etc.
+- The idea is to separate the components into:
+  1. A component that has the state and updates the state.
+  2. A component that has all of the presentational (or ui) logic.
+     - This component only receives props and makes sure that they are displayed correctly.
+- [Presentational and Container Components](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0)
+- Example break the previous form example into two files:
+  - The example uses the ES6 spread operator **...** to pass the state down to the FormComponent.
+    - If you can't or don't want to use ES6 you can create a new variable to pass to the FormComponent so
+      1. In *FormContainers.js* replace **{...this.state}** with **data={this.state}**.
+      2. In *FormComponent.js* replace the props like **{props.firstName}** with **{props.data.firstName}**.
+- *FormContainer.js*
+```
+import React, {Component} from "react";
+import FormComponent from "./FormComponent";
+
+class Form extends Component {
+    constructor() {
+        super()
+        this.state = {
+            firstName: "",
+            lastName: "",
+            age: "",
+            gender: "",
+            destination: "",
+            isVegan: false,
+            isKosher: false,
+            isLactoseFree: false
+        }
+        this.handleChange = this.handleChange.bind(this)
+    }...
+    render() {
+        return(
+            <FormComponent
+                handleChange={this.handleChange}
+                data={this.state}
+            />
+        )
+    }}
+
+export default Form
+```
+- *FormComponent.js*
+```
+import React from "react";
+
+function FormComponent(props) {
+    return (
+        <main>
+            <form>
+                <input 
+                    name="firstName" 
+                    value={props.firstName} 
+                    onChange={props.handleChange} 
+                    placeholder="First Name" 
+                />
+                <br />
+                
+                <input 
+                    name="lastName" 
+                    value={props.lastName}
+                    onChange={props.handleChange} 
+                    placeholder="Last Name" 
+                />
+                <br />
+...
+            </form>
+        </main>
+    )
+}
+
+export default FormComponent;
+```
+- *App.js*
+```
+import React, {Component} from "react"
+import Form from "./FormContainer"
+
+function App() {
+    return (
+        <Form />
+    )
+}
+
+export default App
+```
+ 
+ ### With libraries like Redux and Context API the splitting of component concerns is not done as often.
+ - Expecially when you are injecting context or global state from Redux into your components.
+   - In that case the business logic of your components is done in a different place entirely.

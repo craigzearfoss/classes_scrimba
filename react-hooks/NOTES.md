@@ -45,6 +45,7 @@
 - The **ref.current** property holds the DOM element. So, for example to set focus to the ref element:
   - *inputRef.current.focus();*
 - You can use it for thing other things, but accessing DOM elements is the most common use case.
+- You can use it anytime you need a value that is the same between renders.
 
 ### **memoization**
 - If you have a pure function you can **memoize** it.
@@ -70,3 +71,10 @@ useMemo(() => () => console.log('useMemo'))
   - But if you have two unrelated pieces of state that might make it more difficult.
 - Think of them as small, composable, and as reusable as possible.
 - The convetion is to start them with "use"
+
+---
+
+# Two Rules
+## 1. Only call hooks on the top level.
+## 2. Only call hooks from React functions. (Not your own custom functions)
+

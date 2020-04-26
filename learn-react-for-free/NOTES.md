@@ -2,6 +2,7 @@
 
 - Scrimba
 - Bob Ziroll
+- Completed Apr 25, 2020
 
 ---
 
@@ -1164,3 +1165,258 @@ export default App
  ### With libraries like Redux and Context API the splitting of component concerns is not done as often.
  - Expecially when you are injecting context or global state from Redux into your components.
    - In that case the business logic of your components is done in a different place entirely.
+
+---
+
+## Modern React Apps
+- These are new or upcoming features in React or JavaScript.
+
+### Methods can be written using ES6 arrow functions.
+- It gives the method a lexical *this* inside of it.
+  - It doesn't create it's own *this* context. Instead it uses the *this* of it's surrounding environment.
+  - Therefore you no longer need to bind your methods in the constructor.
+- So this...
+```
+    ... 
+    constructor() {
+        super()
+        this.state = {}
+        this.handleChange = this.handleChange.bind(this)
+    }
+    
+    handleChange(event) {
+        ...
+    }
+```
+- Becomes ...
+```
+    ... 
+    constructor() {
+        super()
+        this.state = {}
+    }
+    
+ handleChange = (event) => {
+    ...
+}
+```
+
+### Ability to create class variables outside of the contructor.
+- This is currently just a proposal for JavaScript.
+- So this...
+```
+class App extends Component {
+    constructor() {
+        super()
+        this.state = {
+            firstName: ""
+        }
+    }
+    ...
+```
+- Becomes...
+```
+class App extends Component {
+    state = {
+        firstName: ""
+    }
+    ...
+```
+
+### Other modern/advanced React features/topics to learn:
+- [Official React Context API](https://reactjs.org/docs/context.html)
+  - Can be used instead of Redux.
+  - Does everything that Redux does and is simpler to use.
+- [Error Boundaries](https://reactjs.org/docs/error-boundaries.html)
+- [render props](https://reactjs.org/docs/render-props.html)
+- [Higher Order Components](https://reactjs.org/docs/higher-order-components.html)
+- [React Router](https://reacttraining.com/react-router/core/guides/philosophy)
+  - Great way to make a single page app using a very the declarative library react-router.
+- [React Hooks](https://reactjs.org/docs/hooks-intro.html)
+  - Have to do with a way of using and modifying state inside of a functional component.
+- [React lazy, memo, and Suspense](https://reactjs.org/blog/2018/10/23/react-v-16-6.html)
+  - Suspense has to do with asynchronous loading.
+
+### React seems to be encouraging the use of functional-based components more and more.
+
+### React is changing constantly so keep up-to-date on those changes.
+
+---
+
+## Hooks
+- Introduced in React 16.8
+- Hooks are to "hook into"" state and lifecycle methods of components without using classes.
+- Allows you to only use functional components across the board.
+  - There has been a large shift away from class components to functional components.
+- Improves the readability and organization of components.
+
+### useState()
+- Whatever you put inside of the **useState()** function will be your initial state.
+- It returns an array.
+  - You can use array destructing as shown in the example below.
+    - const [ count, setCount ] = useState(0);
+    - With array destructing, unlike with object destructuring, you can call the variables anything you want.
+  - The second element is a function.
+  - The example below uses the function in two different ways:
+    1. The Increment button has all of the JavaScript inline.
+    2. The Decrement button has created a separate **decrement** function.  This looks cleaner than having everything inline.
+- Notice that you don't have to keep objects in your state but can just keep it to a few values that you care about.
+- If you use an oject or an array in the useState function you'll have to deal with the entire object or array. The spread operator is useful for this.
+  - However, why not just create a separate useState method call for each value. This is much cleaner.
+
+- Class component
+```
+import React from "react";
+
+class App extends React.Component {
+    constructor() {
+        super()
+        this.state = {
+            count: 0
+        }
+    }
+    
+    render() {
+        return (
+            <div>
+                <h1>{this.state.count}</h1>
+                <button>Change!</button>
+            </div>
+        );
+    }
+}
+
+export default App;
+```
+- Functional component using the **useState()** method.
+```
+import React, { useState } from "react";
+
+function App() {
+    const [ count, setCount ] = useState(0);
+
+    function decrement() {
+        setCount(prevCount => prevCount - 1);
+    }
+
+    return (
+        <div>
+            <h1>{count}</h1>
+            <button onClick={() => setCount(prevCount => prevCount + 1)}>Increment</button>
+            
+            <button onClick={decrement}>Decrement</button>
+        </div>
+    );
+}
+```
+
+### useEffect()
+- Allows you to hook into a components lifecycle methods.
+- It is considered a replacement for the lifecycle methods componentDidMount, componentWillUpdate and componentWillUnmount.
+- Think of it as a hook that allows us to produce side affects in our component.
+  - Side effects are anything that reach outside the component to do something. (They don't have to do with managing state or displaying content to the screen.)
+    - Network request
+    - Manual DOM manipulation
+    - Event listeners
+    - Timeouts or intervals
+- First parameter is a callback function.
+- Second parameter is an array of what variable to watch for changes in. (You can specify multiple variables.)
+    - If the variable changes it will run the affect again.
+    - If you specify an empty array the effect will only happen when the component mounts and never again.
+```
+import React, {useState, useEffect} from "react"
+import randomcolor from "randomcolor"
+
+function App() {
+    const [count, setCount] = useState(0)
+    const [color, setColor] = useState("")
+    
+    function increment() {
+        setCount(prevCount => prevCount + 1)
+    }
+    
+    function decrement() {
+        setCount(prevCount => prevCount - 1)
+    }
+    
+    useEffect(() => {
+        setColor(randomcolor())
+    }, [count])
+    
+    return (
+        <div>
+            <h1 style={{color: color}}>{count}</h1>
+            <button onClick={increment}>Increment</button>
+            <button onClick={decrement}>Decrement</button>
+        </div>
+    )
+}
+
+export default App
+```
+
+#### Components are automatically cleaned up when the component unmounts
+- But some side effects we introduce won't be cleaned up automatically.
+  - When you create an event listener manually on another part of your document. (document.addEventListener(...))
+  - You set up some kind of socket subscription that watches for changes in real time.  (Like a real time chat client)
+- These will be outside of the scope of you component and can cause memory leaks, recurring jobs or some other kind of residual problems.
+- Normal we would clean these up in the componentWillUnmount method.
+- useEffect returns a function and we can use that function to do our cleanup.
+```
+import React, {useState, useEffect} from "react"
+import randomcolor from "randomcolor"
+
+function App() {
+    const [count, setCount] = useState(0)
+    const [color, setColor] = useState("")
+    
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            // setCount(prevCount => prevCount + 1)
+        }, 1000)
+        return () => clearInterval(intervalId)
+    }, [])
+    
+    useEffect(() => {
+        setColor(randomcolor())
+    }, [count])
+    
+    return (
+        <div>
+            <h1 style={{color: color}}>{count}</h1>
+        </div>
+    )
+}
+
+export default App
+```
+
+### sideEffect() Summary
+- Note that we were able to replace the following lifecyle methods in the ways listed below.
+  - componentDidMount - specify an empty array []
+  - componentWillUpdate - specify the variables to watch for changes in the array [count]
+  - componentWillUnmount - place the cleanup on the function that is returned from sideEffects()
+
+
+---
+
+# Summary
+
+- JSX
+  - A wrapper around JavaScript that allows you to write your ui in HTML syntax.
+- Functional vs Class Components
+  - Functional - *function App(props) { ... }*
+     Use unless you need state or lifecycle methods.
+  - Class - *class App extends React.Component { ... }*
+    - Must use class-based components if you need state or lifecycle methods.
+- Styling
+  - If you're using css classes you need to you **className** inside of you JSX.
+  - You can write you css directly in a style object directly in your JavaScript.
+- Props
+  - The primary way to pass data down the components tree.
+- State
+  - Allows you components to hold onto and modify the data.
+- Conditional Rendering
+  - Using vanilla JavaScript you can choose what part of your ui you want to show up at any given time.
+- Forms
+  - How to gather input from users in form elements.
